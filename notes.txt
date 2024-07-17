@@ -1,0 +1,4 @@
+
+echo "mypassword" | docker secret create my_secret -
+
+kubectl get service my-app-demo-service -o json | jq .status.loadBalancer.ingress[0].ip

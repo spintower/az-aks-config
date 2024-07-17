@@ -1,0 +1,9 @@
+services:
+  nginx:
+    image: nginx:1.27.0
+    container_name: nginx
+    restart: unless-stopped
+    volumes:
+      - ./files/docker-entrypoint.d/40-print-env-vars.sh:/docker-entrypoint.d/40-print-env-vars.sh:ro
+    ports:
+      - "8080:80"

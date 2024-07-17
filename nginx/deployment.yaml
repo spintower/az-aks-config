@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-demo
+  labels:
+    app: my-app-demo
+    # azure.workload.identity/use: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app-demo
+  template:
+    metadata:
+      labels:
+        app: my-app-demo
+    spec:
+      # serviceAccountName: workload-identity-sa
+      containers:
+      - name: my-app-demo
+        image: ${myContainerRegistry}.azurecr.io/nginx-envprint:latest
+        envFrom:
+        - configMapRef:
+            name: configmap-created-by-appconfig-provider          
+        ports:
+        - containerPort: 80
+
