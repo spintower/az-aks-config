@@ -1,3 +1,19 @@
+# AZ-AKS-config
+
+## How to use
+
+Edit `setup.sh` and put a random string into `UNIQUE_SUFFIX` variable to avoid collisions
+with globally unique names.
+
+```shell
+$ source setup.sh
+$ source azure-env-functions.sh
+```
+
+Run commands in order from `azure-env.sh` starting with `show_initial_vars`.
+
+## Random notes
+
 cd nginx-envprint
 docker build -t nginx-envprint .
 docker tag nginx-envprint ${myContainerRegistry}.azurecr.io/nginx-envprint

@@ -1,9 +1,9 @@
 # initial naming setup
+export UNIQUE_SUFFIX=abcabc # put a random string here, some names must be globally unique
 
 # base name, 14 chars or less
 export MY_APP_NAME=configed-app
 export MY_APP_NAME_NODASH=$(echo ${MY_APP_NAME} | tr -d "-")
-export UNIQUE_SUFFIX=cafefe # put a random string here, some names must be globally unique
 export AZURE_LOCATION=eastus
 export myResourceGroup=${MY_APP_NAME}-rg
 export myAKSCluster=${MY_APP_NAME}-aks-cluster
