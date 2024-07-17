@@ -296,11 +296,14 @@ function k8s_secret_exists() {
 
 function create_k8s_secret() {
     echo Creating k8s secret $K8S_SECRET_FOR_CONFIG
-    local cmd="kubectl create secret generic \
+    # local cmd="kubectl create secret generic \
+    #     config-service-secret \
+    #     --from-literal=azure_app_configuration_connection_string=$APPCONFIG_CONNECTION_STRING'"
+    # echo $cmd
+    # $cmd
+    kubectl create secret generic \
         config-service-secret \
-        --from-literal=azure_app_configuration_connection_string='$APPCONFIG_CONNECTION_STRING'"
-    echo $cmd
-    $cmd
+        --from-literal="azure_app_configuration_connection_string=$APPCONFIG_CONNECTION_STRING"
 }
 
 function ensure_k8s_secret() {

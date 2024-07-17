@@ -23,7 +23,7 @@ login_to_registry
 
 ensure_aks_cluster
 
-#build_and_push_envprint
+build_and_push_envprint
 
 install_kubernestes_provider
 
