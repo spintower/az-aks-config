@@ -12,6 +12,14 @@ $ source azure-env-functions.sh
 
 Run commands in order from `azure-env.sh` starting with `show_initial_vars`.
 
+The last command will print the external IP address of the service, use curl to get
+the environment variables from the pod:
+
+```shell
+curl http://[external-ip]/env.txt
+```
+
+
 ## Random notes
 
 cd nginx-envprint

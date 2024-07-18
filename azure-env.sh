@@ -30,3 +30,5 @@ install_kubernestes_provider
 ensure_k8s_secret
 
 ensure_config_configmap
+
+create_and_start_service
