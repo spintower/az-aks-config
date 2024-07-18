@@ -243,7 +243,7 @@ function set_ask_cluster_credentials() {
 function build_and_push_envprint() {
     pushd .
     cd nginx-envprint
-    docker build -t nginx-envprint .
+    docker build --platform linux/amd64 -t nginx-envprint .
     docker tag nginx-envprint ${myContainerRegistry}.azurecr.io/nginx-envprint
     docker push ${myContainerRegistry}.azurecr.io/nginx-envprint
     popd
