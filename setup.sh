@@ -1,5 +1,5 @@
 # initial naming setup
-export UNIQUE_SUFFIX=abcabc # put a random string here, some names must be globally unique
+export UNIQUE_SUFFIX=cafefe # put a random string here, some names must be globally unique
 
 # base name, 14 chars or less
 export MY_APP_NAME=configed-app
@@ -23,3 +23,5 @@ export AKS_CLUSTER_PRINCIPAL="not yet set"
 export K8S_SECRET_FOR_CONFIG=config-service-secret
 # configmap from configprovider
 export CONFIGMAP_FROM_CONFIG_PROVIDER=configmap-created-by-appconfig-provider
+# k8s namespace for service and secrets
+export K8S_APP_NAMESPACE=blob-management

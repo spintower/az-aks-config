@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app-demo
+  namespace: ${K8S_APP_NAMESPACE}
   labels:
     app: my-app-demo
     # azure.workload.identity/use: "true"

@@ -22,6 +22,7 @@ ensure_container_registry
 login_to_registry
 
 ensure_aks_cluster
+ensure_k8s_app_namespace
 
 build_and_push_envprint
 

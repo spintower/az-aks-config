@@ -16,6 +16,7 @@ function show_initial_vars() {
     echo AKS_CLUSTER_PRINCIPAL=${AKS_CLUSTER_PRINCIPAL}
     echo K8S_SECRET_FOR_CONFIG=${K8S_SECRET_FOR_CONFIG}
     echo CONFIGMAP_FROM_CONFIG_PROVIDER=${CONFIGMAP_FROM_CONFIG_PROVIDER}
+    echo K8S_APP_NAMESPACE=${K8S_APP_NAMESPACE}
 }
 
 function resource_group_exists() {
@@ -240,6 +241,12 @@ function set_ask_cluster_credentials() {
 }
 
 # ================= push docker container ================
+function ensure_k8s_app_namespace() {
+    echo Creating k8s app namespace if needed...
+    kubectl get namespace | grep -q "^${K8S_APP_NAMESPACE} " || kubectl create namespace ${K8S_APP_NAMESPACE}
+}
+
+# ================= push docker container ================
 function build_and_push_envprint() {
     pushd .
     cd nginx-envprint
@@ -284,8 +291,8 @@ function assign_aks_to_config_role() {
 
 # ================= secret in k8s ================
 function k8s_secret_exists() {
-    echo Checking k8s secret $K8S_SECRET_FOR_CONFIG
-    local cmd="kubectl get secret $K8S_SECRET_FOR_CONFIG"
+    echo Checking k8s secret $K8S_SECRET_FOR_CONFIG -n ${K8S_APP_NAMESPACE}
+    local cmd="kubectl get secret $K8S_SECRET_FOR_CONFIG -n ${K8S_APP_NAMESPACE}"
     echo $cmd
     local EXIT_CODE
     EXIT_CODE=0
@@ -297,11 +304,13 @@ function k8s_secret_exists() {
 function create_k8s_secret() {
     echo Creating k8s secret $K8S_SECRET_FOR_CONFIG
     # local cmd="kubectl create secret generic \
+    #     --namespace ${K8S_APP_NAMESPACE} \
     #     config-service-secret \
     #     --from-literal=azure_app_configuration_connection_string=$APPCONFIG_CONNECTION_STRING'"
     # echo $cmd
     # $cmd
     kubectl create secret generic \
+        --namespace ${K8S_APP_NAMESPACE} \
         config-service-secret \
         --from-literal="azure_app_configuration_connection_string=$APPCONFIG_CONNECTION_STRING"
 }
@@ -345,7 +354,16 @@ function ensure_config_configmap() {
 
 # ================= config_configmap ================
 function create_and_start_service() {
+    echo Creating deployment...
     cat nginx/deployment.yaml | envsubst | kubectl apply -f -
+    echo Creating service...
     cat nginx/service.yaml | envsubst | kubectl apply -f -
-    kubectl get service my-app-demo-service -o json | jq .status.loadBalancer.ingress[0].ip
+    cat Getting load balancer external IP...
+    export LB_EXTERNAL_IP=$(kubectl get service my-app-demo-service -n ${K8S_APP_NAMESPACE} -o json | jq -r .status.loadBalancer.ingress[0].ip)
+    echo Found external IP: ${LB_EXTERNAL_IP}
+}
+
+function check_service_settings() {
+    echo curl http://${LB_EXTERNAL_IP}/env.txt
+    curl http://${LB_EXTERNAL_IP}/env.txt
 }
