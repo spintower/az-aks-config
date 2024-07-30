@@ -1,5 +1,11 @@
 # initial naming setup
-export UNIQUE_SUFFIX=cafefe # put a random string here, some names must be globally unique
+export UNIQUE_SUFFIX=clove1 # put a random string here, some names must be globally unique
+
+# my user id
+export MY_USER_ID="not yet set"
+export MY_MANAGED_IDENTITY_NAME="my_managed_identity"
+export MY_MANAGED_IDENTITY_ID="not yet set"
+export MY_MANAGED_IDENTITY_PRINCIPAL_ID="not yet set"
 
 # base name, 14 chars or less
 export MY_APP_NAME=configed-app
@@ -11,6 +17,9 @@ export myAKSCluster=${MY_APP_NAME}-aks-cluster
 export appConfigServiceName=${MY_APP_NAME}-configservice-${UNIQUE_SUFFIX}
 # key vault name: must be globally unique under 24 chars
 export myKeyVault=${MY_APP_NAME}-kv-${UNIQUE_SUFFIX}
+export keyVaultId="not yet set"
+export kvKeyName=${MY_APP_NAME}-secret-key
+export myKvValue=my-kv-value
 export APPCONFIG_ENDPOINT="not-yet-set"
 export APPCONFIG_CONNECTION_STRING="not-yet-set"
 export APPCONFIG_CONNECTION_STRING_RO="not-yet-set"

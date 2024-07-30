@@ -1,6 +1,7 @@
 
 
 function show_initial_vars() {
+    echo MY_USER_ID=$MY_USER_ID
     echo MY_APP_NAME=$MY_APP_NAME
     echo MY_APP_NAME_NODASH=$MY_APP_NAME_NODASH
     echo UNIQUE_SUFFIX=$UNIQUE_SUFFIX
@@ -19,6 +20,12 @@ function show_initial_vars() {
     echo K8S_APP_NAMESPACE=${K8S_APP_NAMESPACE}
 }
 
+function initial_setup() {
+    export MY_USER_ID=$(az ad signed-in-user show --query id -o tsv)
+    show_initial_vars
+}
+
+# ================= resource group ================
 function resource_group_exists() {
     echo Checking resource group $myResourceGroup
     local cmd="az group show --name $myResourceGroup"
@@ -46,6 +53,50 @@ function ensure_resource_group() {
     fi
 }
 
+# ================= managed identity ================
+function managed_identity_exists() {
+    echo Checking managed identity $MY_MANAGED_IDENTITY_NAME
+    local cmd="az identity show --name $MY_MANAGED_IDENTITY_NAME --resource-group $myResourceGroup "
+    echo $cmd
+    local EXIT_CODE
+    EXIT_CODE=0
+    $cmd || EXIT_CODE=$?
+    if [ $AE_DEBUG ] ; then echo $EXIT_CODE; fi
+    return $EXIT_CODE
+}
+
+function create_managed_identity() {
+    echo Creating managed identity $MY_MANAGED_IDENTITY_NAME
+    local cmd="az identity create \
+        --name $MY_MANAGED_IDENTITY_NAME \
+        --location $AZURE_LOCATION \
+        --resource-group $myResourceGroup"
+    echo $cmd
+    $cmd
+}
+
+function ensure_managed_identity() {
+    if managed_identity_exists ; then
+        echo managed identity $appConfigServiceName already exists, good.
+    else
+        echo managed identity $appConfigServiceName does not exist, creating
+        create_managed_identity
+    fi
+    expose_managed_identity
+}
+
+function expose_managed_identity() {
+    local id
+    local principal_id
+    id=$(az identity show --name $MY_MANAGED_IDENTITY_NAME -g ${myResourceGroup} --query id -o tsv)
+    principal_id=$(az identity show --name $MY_MANAGED_IDENTITY_NAME -g ${myResourceGroup} --query principalId -o tsv)
+    echo Setting MY_MANAGED_IDENTITY_ID to "$id"
+    export MY_MANAGED_IDENTITY_ID="$id"
+    echo Setting MY_MANAGED_IDENTITY_PRINCIPAL_ID to "$principal_id"
+    export MY_MANAGED_IDENTITY_PRINCIPAL_ID="$principal_id"
+}
+
+# ================= appconfig service ================
 function appconfig_service_exists() {
     echo Checking appconfig service $appConfigServiceName
     local cmd="az appconfig show --name $appConfigServiceName"
@@ -63,7 +114,7 @@ function create_appconfig_service() {
         --name $appConfigServiceName \
         --location $AZURE_LOCATION \
         --resource-group $myResourceGroup \
-        --sku free"
+        --sku Standard"
     echo $cmd
     $cmd
 }
@@ -75,6 +126,15 @@ function ensure_appconfig_service() {
         echo app configuration service $appConfigServiceName does not exist, creating
         create_appconfig_service
     fi
+    expose_appconfig_service_id
+    add_managed_identity_to_config_service
+}
+
+function add_managed_identity_to_config_service() {
+    echo adding managed identity to appcoinfig service in role \"App Configuration Data Reader\"
+    az role assignment create --assignee ${MY_MANAGED_IDENTITY_PRINCIPAL_ID} \
+        --role "App Configuration Data Reader" \
+        --scope ${APPCONFIG_SERVICE_ID}
 }
 
 function set_appconfig_endoint() {
@@ -159,6 +219,60 @@ function ensure_keyvault() {
     else
         echo keyvault $myKeyVault does not exist, creating
         create_keyvault
+    fi
+    expose_keyvault_id
+    add_user_to_keyvault
+    add_managed_identity_to_keyvault
+}
+
+function add_user_to_keyvault() {
+    echo adding current user to keyvault in role \"Key Vault Secrets Officer\"
+    az role assignment create \
+        --role "Key Vault Secrets Officer" \
+        --assignee ${MY_USER_ID} \
+        --scope $keyVaultId 
+}
+
+function add_managed_identity_to_keyvault() {
+    echo adding managed identity to keyvault in role \"Key Vault Secrets Officer\"
+    az role assignment create \
+        --role "Key Vault Secrets Officer" \
+        --assignee ${MY_MANAGED_IDENTITY_PRINCIPAL_ID} \
+        --scope $keyVaultId 
+}
+
+function expose_keyvault_id() {
+    local keyvault_id
+    keyvault_id=$(az keyvault show --name $myKeyVault --query "id" -o tsv)
+    echo Setting keyVaultId to "$keyvault_id"
+    export keyVaultId="$keyvault_id"
+}
+
+# ================= key vault secret ================
+function keyvault_key_exists() {
+    echo Checking keyvault $myKeyVault for secret $kvKeyName
+    local cmd="az keyvault secret show --vault-name $myKeyVault -n $kvKeyName "
+    echo $cmd
+    local EXIT_CODE
+    EXIT_CODE=0
+    $cmd || EXIT_CODE=$?
+    if [ $AE_DEBUG ] ; then echo $EXIT_CODE; fi
+    return $EXIT_CODE
+}
+
+function create_keyvault_key() {
+    echo Creating secret $kvKeyName in keyvault $myKeyVault
+    local cmd="az keyvault secret set --vault-name $myKeyVault --name $kvKeyName --value $myKvValue"
+    echo $cmd
+    $cmd
+}
+
+function ensure_keyvault_key() {
+    if keyvault_key_exists ; then
+        echo keyvault $myKeyVault already has key $kvKeyName, good.
+    else
+        echo keyvault $myKeyVault does not have key $kvKeyName, creating
+        create_keyvault_key
     fi
 }
 
@@ -257,7 +371,7 @@ function build_and_push_envprint() {
 }
 
 # ================= install kubernetes provider ================
-function install_kubernestes_provider() {
+function install_kubernetes_provider() {
     local cmd
     cmd="helm install azureappconfiguration.kubernetesprovider \
     oci://mcr.microsoft.com/azure-app-configuration/helmchart/kubernetes-provider \

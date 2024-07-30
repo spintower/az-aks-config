@@ -1,0 +1,9 @@
+apiVersion: azconfig.io/v1
+kind: AzureAppConfigurationProvider
+metadata:
+  name: appconfigurationprovider-sample
+  namespace: ${K8S_APP_NAMESPACE}
+spec:
+  endpoint: ${APPCONFIG_ENDPOINT}
+  target:
+    configMapName: configmap-created-by-appconfig-provider
