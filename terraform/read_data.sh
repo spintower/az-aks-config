@@ -1,0 +1,19 @@
+export ADMIN_LOGIN=$(cat localfiles/admin_login)
+export ADMIN_PASSWORD=$(cat localfiles/admin_password)
+export RESOURCE_GROUP_NAME=$(cat localfiles/resource_group_name)
+export PUBLIC_IP_ADDRESS=$(cat localfiles/public_ip_address)
+export DBSERVER=$(cat localfiles/dbserver)
+export DBNAME=$(cat localfiles/dbname)
+export SQLADMIN_NAME=$(cat localfiles/sqladmin_name)
+export SQLADMIN_PASSWORD=$(cat localfiles/sqladmin_password)
+export MINAME=$(cat localfiles/miname)
+
+echo ADMIN_LOGIN=\"$ADMIN_LOGIN\" > localfiles/env.sh
+echo ADMIN_PASSWORD=\"$ADMIN_PASSWORD\" >> localfiles/env.sh
+echo RESOURCE_GROUP_NAME=\"$RESOURCE_GROUP_NAME\" >> localfiles/env.sh
+echo PUBLIC_IP_ADDRESS=\"$PUBLIC_IP_ADDRESS\" >> localfiles/env.sh
+echo DBSERVER=\"$DBSERVER\" >> localfiles/env.sh
+echo DBNAME=\"$DBNAME\" >> localfiles/env.sh
+echo SQLADMIN_NAME=\"$SQLADMIN_NAME\" >> localfiles/env.sh
+echo SQLADMIN_PASSWORD=\"$SQLADMIN_PASSWORD\" >> localfiles/env.sh
+echo MINAME=\"$MINAME\" >> localfiles/env.sh

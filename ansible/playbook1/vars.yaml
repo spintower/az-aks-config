@@ -1,0 +1,3 @@
+AZURE_LOCATION: eastus
+VAR1: var1
+RESOURCE_GROUP_NAME: configedapp-rg

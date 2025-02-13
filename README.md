@@ -41,3 +41,7 @@ alex@ :~/work/aks/azure/az-aks-config$ az role assignment create --role "Key Vau
   "updatedBy": "3ddff80c-4004-447a-881c-719d3c015be9",
   "updatedOn": "2024-07-30T05:37:45.375350+00:00"
 }
+
+python3 -m pip install -r ~/venv/ansible/lib/python3.12/site-packages/ansible_collections/azure/azcollection/requirements.txt
+
+python3 -m pip install setuptools

@@ -1,0 +1,17 @@
+---
+- name: Create resource group
+  hosts: localhost
+  vars:
+    - VAR2: var2
+  vars_files:
+   - vars.yaml
+  tasks:
+    - name: print var
+      debug: msg="myvar {{ AZURE_LOCATION }} var1 {{ VAR1 }} var2 {{ VAR2 }}"
+    - name: create resource group
+      azure_rm_resourcegroup:
+        name: "{{ RESOURCE_GROUP_NAME }}"
+        location: "{{ AZURE_LOCATION }}"
+      register: created_resource_group
+    - name: print group
+      debug: msg="group {{ created_resource_group }}"
